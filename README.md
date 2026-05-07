@@ -28,6 +28,7 @@ npm install -g @anthropic-ai/claude-code
 # Official native aarch64 binary (force-installed for Android)
 npm install -g @anthropic-ai/claude-code-linux-arm64 --force
 ```
+
 ## Step 3: Create the Native Wrapper
 
 Instead of moving binaries, we create a direct wrapper script that uses the `glibc` runner (`grun`) to execute the native binary. Use `/bin/sh` with absolute paths to avoid shell initialization issues. We also clear `LD_PRELOAD` to prevent conflicts with Termux's internal libraries.
@@ -56,20 +57,43 @@ ln -sf /data/data/com.termux/files/usr/glibc/lib/libm.so.6 /data/data/com.termux
 ```
 
 ## Step 5: Verification
-**Note:** Do not use bash in the shebang or variable expansion—new shell sessions may have glibc initialization issues. The absolute path approach is more robust.
-
-## Step 4: Verification
 
 ```bash
 claude --version
 ```
 Expected output: `2.x.x (Claude Code)`
 
+**Note:** Do not use bash in the shebang or variable expansion—new shell sessions may have glibc initialization issues. The absolute path approach is more robust.
+
+## Troubleshooting & Repair
+
+If you encounter errors like `invalid ELF header` for `libc.so` or `version 'LIBC' not found`, it usually indicates a corruption or conflict in the `glibc` environment.
+
+### Full Repair Procedure
+If the environment becomes unstable (e.g., after long uptime or failed updates), follow these steps to reset:
+
+1. **Uninstall glibc and repo:**
+   ```bash
+   pkg uninstall -y glibc glibc-repo
+   pkg clean
+   ```
+
+2. **Reinstall from scratch:**
+   ```bash
+   pkg update
+   pkg install -y glibc-repo
+   pkg install -y glibc
+   ```
+
+3. **Verify and Restore Wrapper:**
+   Ensure the wrapper script at `/usr/bin/claude` is correct (see Step 3) and verify with `claude --version`.
+
 ## Why this works
 - **glibc-repo**: Provides a standard Linux C library environment within Termux.
 - **grun**: A loader that runs glibc-linked binaries using the libraries in `/usr/glibc`.
 - **--force**: Bypasses the `npm` platform check that usually blocks "linux" packages on "android".
+- **LD_PRELOAD=**: Clearing this environment variable prevents Termux's internal libraries from interfering with the glibc-linked native binary.
 
 ---
 *Verified and updated on May 6, 2026.*
-*Wrapper revised to use `/bin/sh` with absolute paths for robustness.*
+*Wrapper revised to use `/bin/sh` with absolute paths and LD_PRELOAD clearing for robustness.*
