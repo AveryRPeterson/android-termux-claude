@@ -2,6 +2,27 @@
 
 This guide provides a reproducible method for installing the official **Claude Code** (Anthropic CLI) on Termux. It uses the `glibc` repository to run the native Linux binary, bypassing the "Unsupported platform" error.
 
+## Automated Install
+
+An `install.sh` script is included that automates all steps below.
+
+```bash
+# Fresh install
+./install.sh
+
+# Preview what it will do without executing anything
+./install.sh --dry-run
+
+# Reset a broken glibc environment and restore the wrapper
+./install.sh --repair
+```
+
+Run `./install.sh --help` for full usage.
+
+---
+
+## Manual Installation
+
 ## Prerequisites
 
 1. **Termux**: F-Droid or GitHub version.
